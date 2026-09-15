@@ -294,13 +294,13 @@
 
     // 相手のスマホへプッシュ通知を送信
     try {
-      fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+      // タイトルの日本語は、HTTPヘッダーではなくURLのクエリパラメータとして渡す
+      // （ヘッダーだとntfy側がURLデコードしてくれず、文字化けして表示されてしまうため）
+      const titleParam = encodeURIComponent('おはなしボタン：緊急連絡');
+      fetch(`https://ntfy.sh/${NTFY_TOPIC}?title=${titleParam}`, {
         method: 'POST',
         body: EMERGENCY_TEXT,
         headers: {
-          // HTTPヘッダーの値は半角英数字(ASCII)しか使えないため、
-          // 日本語のタイトルはURLエンコードして渡す（ntfy側で自動的に元の文字列に戻して表示される）
-          'Title': encodeURIComponent('おはなしボタン：緊急連絡'),
           'Priority': 'urgent',
           'Tags': 'rotating_light'
         }
