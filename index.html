@@ -36,10 +36,10 @@
     opacity: 0.75;
   }
   .menu {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    width: min(90vw, 420px);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: min(92vw, 620px);
   }
   .menu-link {
     display: block;
@@ -48,8 +48,8 @@
     background: var(--btn);
     color: white;
     text-decoration: none;
-    padding: 34px 20px;
-    font-size: 1.3rem;
+    padding: 30px 18px;
+    font-size: 1.2rem;
     font-weight: 700;
     box-shadow: 0 8px 22px rgba(255, 111, 145, 0.35);
     transition: transform 0.15s ease, box-shadow 0.15s ease,
@@ -76,6 +76,16 @@
     opacity: 0.85;
     margin-top: 6px;
   }
+
+  /* カテゴリーごとの色（各ページのアクセントカラーと合わせている） */
+  .menu-link.blue { background: #6fb7ff; box-shadow: 0 8px 22px rgba(111, 183, 255, 0.4); }
+  .menu-link.blue:hover { background: #4f9fe8; }
+  .menu-link.green { background: #6fcf97; box-shadow: 0 8px 22px rgba(111, 207, 151, 0.4); }
+  .menu-link.green:hover { background: #4fae7c; }
+  .menu-link.orange { background: #ffb35c; box-shadow: 0 8px 22px rgba(255, 179, 92, 0.4); }
+  .menu-link.orange:hover { background: #f59a3c; }
+  .menu-link.yellow { background: #ffd54f; color: #5c4a1a; box-shadow: 0 8px 22px rgba(255, 213, 79, 0.45); }
+  .menu-link.yellow:hover { background: #f0c030; }
 </style>
 </head>
 <body>
@@ -85,11 +95,27 @@
 <div class="menu">
   <a class="menu-link" href="kimochi.html">
     気持ちボタン
-    <span class="sub">おとうさん・あつい・さむい 等＋緊急ボタン</span>
+    <span class="sub">よく使う要望・緊急ボタン</span>
   </a>
   <a class="menu-link" href="aiueo.html">
     あいうえお表
     <span class="sub">50音から文章を組み立てて発声</span>
+  </a>
+  <a class="menu-link blue" href="karada-kimochi.html">
+    からだ・きもち
+    <span class="sub">あつい・さむい・いたい 等</span>
+  </a>
+  <a class="menu-link green" href="shitehoshii.html">
+    してほしいこと
+    <span class="sub">たべたい・ねたい 等</span>
+  </a>
+  <a class="menu-link orange" href="mono.html">
+    もの
+    <span class="sub">お茶・お水・くすり 等</span>
+  </a>
+  <a class="menu-link yellow" href="yobikake.html">
+    呼びかけ・人
+    <span class="sub">家族や先生の名前</span>
   </a>
 </div>
 

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>呼びかけ・人</title>
+<style>
+  :root {
+    --bg1: #ffe9f0;
+    --bg2: #fff5e6;
+    --btn: #ffd54f;
+    --btn-hover: #f0c030;
+    --btn-text: #5c4a1a;
+    --text: #4a3b3f;
+    --accent: #ffd54f;
+    --accent-hover: #f0c030;
+    --clear: #b0aaa8;
+    --clear-hover: #948d8b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    color: var(--text);
+    text-align: center;
+    padding: 20px;
+  }
+
+  .top-nav {
+    align-self: flex-start;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+  .top-nav a {
+    color: var(--text);
+    opacity: 0.6;
+    text-decoration: none;
+  }
+  .top-nav a:hover { opacity: 1; }
+
+  /* どのページからでも押せる、常設の緊急ボタン */
+  .emergency-fab {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    border: none;
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+    background: #e6483f;
+    box-shadow: 0 6px 16px rgba(230, 72, 63, 0.45);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    z-index: 10;
+  }
+  .emergency-fab:hover { background: #cf372e; }
+  .emergency-fab:active,
+  .emergency-fab.just-clicked { transform: scale(0.94); background: #b32a22; }
+  .emergency-fab.sent { background: #6fae6a; }
+
+  h1 {
+    font-size: 1.05rem;
+    font-weight: 500;
+    margin: 4px 0 16px;
+    opacity: 0.75;
+  }
+
+  /* ===== 組み立て中の文章を表示する欄 ===== */
+  #inputDisplay {
+    width: min(94vw, 760px);
+    min-height: 2.4em;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.08);
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    color: var(--text);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  #inputDisplay.empty::after {
+    content: "ここに選んだ言葉が並びます";
+    opacity: 0.35;
+    font-weight: 500;
+    font-size: 0.85em;
+  }
+
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ctrl-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 12px 22px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+  }
+  .ctrl-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  .ctrl-btn:active { transform: scale(0.95); }
+  .ctrl-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+    transform: none;
+    filter: none;
+  }
+  #speakBtn { background: var(--accent); color: var(--btn-text, white); }
+  #speakBtn:hover:not(:disabled) { background: var(--accent-hover); }
+  #clearBtn { background: var(--clear); }
+  #clearBtn:hover { background: var(--clear-hover); }
+  #backspaceBtn { background: var(--clear); }
+  #backspaceBtn:hover { background: var(--clear-hover); }
+
+  /* ===== 単語ボタン ===== */
+  .word-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    width: min(94vw, 800px);
+    margin-bottom: 20px;
+  }
+  .word-pill {
+    border: 3px solid transparent;
+    border-radius: 20px;
+    background: var(--btn);
+    color: var(--btn-text, white);
+    font-size: clamp(1rem, 2.6vw, 1.2rem);
+    font-weight: 700;
+    cursor: pointer;
+    padding: 22px 30px;
+    min-width: 130px;
+    box-shadow: 0 8px 20px rgba(255, 213, 79, 0.45);
+    transition: transform 0.15s ease, box-shadow 0.15s ease,
+                background 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+  }
+  .word-pill:hover {
+    background: var(--btn-hover);
+    filter: brightness(1.06);
+    border-color: rgba(255,255,255,0.85);
+    transform: scale(1.05);
+    box-shadow: 0 12px 26px rgba(255, 213, 79, 0.6);
+  }
+  .word-pill:active,
+  .word-pill.just-clicked {
+    transform: scale(0.94);
+    border-color: #ffffff;
+    filter: brightness(0.95);
+  }
+
+  #status {
+    font-size: 0.85rem;
+    opacity: 0.6;
+    min-height: 1.2em;
+    margin-bottom: 10px;
+  }
+
+  #settings {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    opacity: 0.55;
+  }
+  #settings select {
+    margin-top: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.78rem;
+    max-width: 90vw;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-nav"><a href="index.html">← ホームにもどる</a></div>
+<button class="emergency-fab" id="emergencyBtn">緊急</button>
+
+<h1>呼びかけたい相手を選んで、ことばを組み立てます</h1>
+
+<div id="inputDisplay" class="empty"></div>
+
+<div class="controls">
+  <button class="ctrl-btn" id="speakBtn">発声</button>
+  <button class="ctrl-btn" id="backspaceBtn">1つ削除</button>
+  <button class="ctrl-btn" id="clearBtn">クリア</button>
+</div>
+
+<div class="word-grid" id="wordGrid">
+  <button class="word-pill" data-word="おとうさん">おとうさん</button>
+  <button class="word-pill" data-word="せんせい">せんせい</button>
+  <button class="word-pill" data-word="マナブ">マナブ</button>
+  <button class="word-pill" data-word="トシエ">トシエ</button>
+  <button class="word-pill" data-word="ヨシト">ヨシト</button>
+  <button class="word-pill" data-word="ミオ">ミオ</button>
+  <button class="word-pill" data-word="だれか">だれか</button>
+</div>
+
+<div id="status">タップしてね</div>
+
+<div id="settings">
+  声の選択（自動で日本語の女性声を選んでいます）<br>
+  <select id="voiceSelect"></select>
+</div>
+
+<script>
+  /* ===================== 音声合成まわり（他ページと共通の仕組み） ===================== */
+  const status = document.getElementById('status');
+  const voiceSelect = document.getElementById('voiceSelect');
+
+  let voices = [];
+  let chosenVoice = null;
+
+  function scoreVoice(v) {
+    let score = 0;
+    const name = v.name.toLowerCase();
+    if (v.lang && v.lang.toLowerCase().startsWith('ja')) score += 100;
+    if (name.includes('natural')) score += 40;
+    if (name.includes('neural')) score += 40;
+    if (name.includes('google')) score += 25;
+    if (!v.localService) score += 15;
+    if (name.includes('female') || name.includes('woman')) score += 20;
+    if (name.includes('nanami') || name.includes('haruka') || name.includes('kyoko') || name.includes('o-ren') || name.includes('sayaka') || name.includes('mizuki')) score += 30;
+    if (name.includes('male') || name.includes('otoya') || name.includes('ichiro')) score -= 100;
+    return score;
+  }
+
+  function populateVoices() {
+    voices = window.speechSynthesis.getVoices();
+    voiceSelect.innerHTML = '';
+
+    const jaVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ja'));
+    const list = jaVoices.length > 0 ? jaVoices : voices;
+
+    list
+      .slice()
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a))
+      .forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = `${v.name} (${v.lang})${v.localService ? '' : ' ☁️'}`;
+        voiceSelect.appendChild(opt);
+      });
+
+    if (list.length > 0) {
+      const best = list.slice().sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+      voiceSelect.value = best.name;
+      chosenVoice = best;
+    } else {
+      status.textContent = '日本語の音声が見つかりませんでした（ブラウザ設定をご確認ください）';
+    }
+  }
+
+  voiceSelect.addEventListener('change', () => {
+    chosenVoice = voices.find(v => v.name === voiceSelect.value) || null;
+  });
+
+  window.speechSynthesis.onvoiceschanged = populateVoices;
+  populateVoices();
+
+  /* ===================== 文章組み立てバー（ページをまたいで共通・localStorageで保持） =====================
+     カテゴリーページ間を行き来しながら単語を選んでも文章が途切れないよう、
+     組み立て中の内容はlocalStorageに保存する。あいうえお表とは別の入れ物（キー）を使う。 */
+  const COMPOSE_KEY = 'talkapp_compose_queue';
+
+  function loadQueue() {
+    try {
+      const raw = localStorage.getItem(COMPOSE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveQueue(queue) {
+    try {
+      localStorage.setItem(COMPOSE_KEY, JSON.stringify(queue));
+    } catch {
+      // 保存できなくても画面表示は続行する
+    }
+  }
+
+  let composeQueue = loadQueue();
+
+  const inputDisplay = document.getElementById('inputDisplay');
+  const speakBtn = document.getElementById('speakBtn');
+
+  function render() {
+    // 単語同士の間に全角スペースを挟み、読み上げたときに自然な間ができるようにする
+    const text = composeQueue.join('　');
+    inputDisplay.textContent = text;
+    inputDisplay.classList.toggle('empty', text.length === 0);
+    speakBtn.disabled = text.length === 0;
+  }
+
+  function addWord(word) {
+    composeQueue.push(word);
+    saveQueue(composeQueue);
+    render();
+  }
+
+  function removeLastWord() {
+    if (composeQueue.length === 0) return;
+    composeQueue.pop();
+    saveQueue(composeQueue);
+    render();
+  }
+
+  function clearQueue() {
+    composeQueue = [];
+    saveQueue(composeQueue);
+    render();
+  }
+
+  render();
+
+  /* ===================== 単語ボタン ===================== */
+  const wordButtons = document.querySelectorAll('.word-pill');
+  wordButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.add('just-clicked');
+      setTimeout(() => btn.classList.remove('just-clicked'), 150);
+      addWord(btn.dataset.word);
+    });
+  });
+
+  /* ===================== 発声・削除・クリア ===================== */
+  const clearBtn = document.getElementById('clearBtn');
+  const backspaceBtn = document.getElementById('backspaceBtn');
+  const wordGrid = document.getElementById('wordGrid');
+
+  function setControlsEnabled(enabled) {
+    wordGrid.classList.toggle('disabled', !enabled);
+    clearBtn.disabled = !enabled;
+    backspaceBtn.disabled = !enabled;
+  }
+
+  speakBtn.addEventListener('click', () => {
+    const text = composeQueue.join('　');
+    if (!text || !('speechSynthesis' in window)) return;
+
+    window.speechSynthesis.cancel();
+    setControlsEnabled(false);
+    speakBtn.disabled = true;
+    status.textContent = '再生中...';
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'ja-JP';
+    if (chosenVoice) utter.voice = chosenVoice;
+    utter.rate = 0.82;
+    utter.pitch = 1.05;
+    utter.volume = 1.0;
+
+    const finish = () => {
+      clearQueue();
+      setControlsEnabled(true);
+      status.textContent = 'タップしてね';
+    };
+
+    utter.onend = finish;
+    utter.onerror = finish;
+
+    window.speechSynthesis.speak(utter);
+  });
+
+  clearBtn.addEventListener('click', () => {
+    window.speechSynthesis.cancel();
+    clearQueue();
+    status.textContent = 'タップしてね';
+  });
+
+  backspaceBtn.addEventListener('click', removeLastWord);
+
+  /* ===================== 緊急ボタン（どのページにも常設） ===================== */
+  const NTFY_TOPIC = 'gaku-talkapp-9fn4uzva5w';
+  const EMERGENCY_TEXT = '緊急です　すぐにきて';
+
+  const emergencyBtn = document.getElementById('emergencyBtn');
+
+  emergencyBtn.addEventListener('click', () => {
+    emergencyBtn.classList.add('just-clicked');
+    setTimeout(() => emergencyBtn.classList.remove('just-clicked'), 180);
+
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(EMERGENCY_TEXT);
+    utter.lang = 'ja-JP';
+    if (chosenVoice) utter.voice = chosenVoice;
+    utter.rate = 0.82;
+    utter.pitch = 1.05;
+    window.speechSynthesis.speak(utter);
+
+    try {
+      const titleParam = encodeURIComponent('おはなしボタン：緊急連絡');
+      fetch(`https://ntfy.sh/${NTFY_TOPIC}?title=${titleParam}`, {
+        method: 'POST',
+        body: EMERGENCY_TEXT,
+        headers: {
+          'Priority': 'urgent',
+          'Tags': 'rotating_light'
+        }
+      })
+        .then(res => {
+          if (res.ok) {
+            emergencyBtn.classList.add('sent');
+            setTimeout(() => emergencyBtn.classList.remove('sent'), 4000);
+          } else {
+            status.textContent = '通知の送信に失敗しました（電波・Wi-Fiをご確認ください）';
+          }
+        })
+        .catch(() => {
+          status.textContent = '通知の送信に失敗しました（電波・Wi-Fiをご確認ください）';
+        });
+    } catch (err) {
+      status.textContent = '通知の送信でエラーが発生しました: ' + err.message;
+    }
+  });
+</script>
+
+</body>
+</html>
