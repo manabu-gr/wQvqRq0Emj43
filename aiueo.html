@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ことばの組み立て</title>
+<title>あいうえお表</title>
 <style>
   :root {
     --bg1: #ffe9f0;
     --bg2: #fff5e6;
+    --btn: #ff8fab;
+    --btn-hover: #ff6f91;
+    --btn-empty: transparent;
     --text: #4a3b3f;
+    --accent: #6fb7ff;
+    --accent-hover: #4f9fe8;
     --clear: #b0aaa8;
     --clear-hover: #948d8b;
-    /* 選択中のカテゴリーに合わせてJSから書き換える */
-    --cat: #6fb7ff;
-    --cat-hover: #4f9fe8;
-    --cat-text: #ffffff;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -45,6 +46,7 @@
   }
   .top-nav a:hover { opacity: 1; }
 
+  /* どのページからでも押せる、常設の緊急ボタン */
   .emergency-fab {
     position: fixed;
     top: 16px;
@@ -94,7 +96,7 @@
     opacity: 0.75;
   }
 
-  /* ===== 組み立て中の文章を表示する欄（どのカテゴリーを見ていても共通） ===== */
+  /* ===== 表示欄 ===== */
   #inputDisplay {
     width: min(94vw, 760px);
     min-height: 2.4em;
@@ -103,7 +105,7 @@
     box-shadow: inset 0 2px 8px rgba(0,0,0,0.08);
     font-size: clamp(1.3rem, 4vw, 1.8rem);
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.06em;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -114,12 +116,13 @@
     white-space: nowrap;
   }
   #inputDisplay.empty::after {
-    content: "ここに選んだ言葉が並びます";
+    content: "ここに選んだ文字が並びます";
     opacity: 0.35;
     font-weight: 500;
     font-size: 0.85em;
   }
 
+  /* ===== 発声/クリア/削除/読点 ボタン列 ===== */
   .controls {
     display: flex;
     gap: 12px;
@@ -146,100 +149,70 @@
     transform: none;
     filter: none;
   }
-  #speakBtn { background: var(--cat); color: var(--cat-text); }
-  #speakBtn:hover:not(:disabled) { background: var(--cat-hover); }
+  #speakBtn { background: var(--accent); }
+  #speakBtn:hover:not(:disabled) { background: var(--accent-hover); }
   #clearBtn { background: var(--clear); }
   #clearBtn:hover { background: var(--clear-hover); }
   #backspaceBtn { background: var(--clear); }
   #backspaceBtn:hover { background: var(--clear-hover); }
+  #commaBtn { background: var(--btn); }
+  #commaBtn:hover { background: var(--btn-hover); }
+  #questionBtn { background: var(--btn); }
+  #questionBtn:hover { background: var(--btn-hover); }
 
-  /* 組み立て欄と、下のカテゴリー選択エリアを視覚的に分ける区切り線 */
-  .divider {
-    width: 100%;
-    max-width: 1000px;
-    border: none;
-    border-top: 2px solid rgba(74, 59, 63, 0.15);
-    margin: 4px 0 24px;
+  /* ===== 50音表グリッド ===== */
+  .kana-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 12px;
+    width: min(96vw, 900px);
+    margin-bottom: 14px;
   }
-
-  /* ===== 下半分：左にカテゴリータブ、右に単語ボタン ===== */
-  .workspace {
-    display: flex;
-    gap: 28px;
-    width: min(94vw, 1000px);
-    align-items: flex-start;
-    justify-content: center;
-  }
-
-  .category-tabs {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    flex: 0 0 auto;
-  }
-  .category-tab {
-    border: 3px solid var(--tab-color, var(--text));
-    border-radius: 16px;
-    background: white;
-    color: var(--tab-color, var(--text));
-    font-size: 1.05rem;
-    font-weight: 700;
-    padding: 18px 22px;
-    min-width: 140px;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease,
-                background 0.15s ease, color 0.15s ease;
-  }
-  .category-tab:hover {
-    transform: scale(1.03);
-  }
-  .category-tab.active {
-    background: var(--tab-color, var(--text));
+  .kana-btn {
+    aspect-ratio: 1 / 1;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background: var(--btn);
     color: white;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-  }
-
-  .word-area {
-    flex: 1 1 auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: flex-start;
-    align-content: flex-start;
-    min-height: 260px;
-  }
-  .word-pill {
-    border: 3px solid transparent;
-    border-radius: 20px;
-    background: var(--cat);
-    color: var(--cat-text);
-    font-size: clamp(1rem, 2.4vw, 1.15rem);
+    font-size: clamp(0.85rem, 2.6vw, 1.25rem);
     font-weight: 700;
     cursor: pointer;
-    padding: 20px 28px;
-    min-width: 120px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    transition: transform 0.15s ease, box-shadow 0.15s ease,
-                background 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(255, 111, 145, 0.3);
+    transition: transform 0.1s ease, box-shadow 0.1s ease,
+                background 0.1s ease, border-color 0.1s ease, filter 0.1s ease;
+    padding: 2px;
   }
-  .word-pill:hover {
-    background: var(--cat-hover);
+  .kana-btn:hover {
+    background: var(--btn-hover);
     filter: brightness(1.06);
     border-color: rgba(255,255,255,0.85);
-    transform: scale(1.05);
+    transform: scale(1.08);
+    box-shadow: 0 8px 18px rgba(255, 111, 145, 0.5);
   }
-  .word-pill:active,
-  .word-pill.just-clicked {
-    transform: scale(0.94);
+  .kana-btn:active,
+  .kana-btn.just-clicked {
+    background: #e85d7a;
     border-color: #ffffff;
-    filter: brightness(0.95);
+    transform: scale(0.9);
+    box-shadow: 0 3px 8px rgba(255, 111, 145, 0.4);
+  }
+  .kana-cell-empty {
+    /* 「や」「わ」「ん」行の空セル：見た目だけ揃えるための透明な余白 */
+    visibility: hidden;
+  }
+  .kana-grid.disabled .kana-btn {
+    opacity: 0.45;
+    pointer-events: none;
   }
 
   #status {
     font-size: 0.85rem;
     opacity: 0.6;
     min-height: 1.2em;
-    margin-top: 24px;
+    margin-bottom: 10px;
   }
 
   #settings {
@@ -256,9 +229,22 @@
     max-width: 90vw;
   }
 
-  @media (max-width: 640px) {
-    .workspace { flex-direction: column; align-items: center; }
-    .category-tabs { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  details.help {
+    width: min(94vw, 760px);
+    margin-top: 18px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-align: left;
+  }
+  details.help summary {
+    cursor: pointer;
+    text-align: center;
+    opacity: 0.9;
+  }
+  details.help ul {
+    margin: 8px 0 0;
+    padding-left: 1.2em;
+    line-height: 1.7;
   }
 </style>
 </head>
@@ -267,22 +253,19 @@
 <div class="top-nav"><a href="index.html">← ホームにもどる</a></div>
 <button class="emergency-fab" id="emergencyBtn">緊急</button>
 
-<h1>カテゴリーと言葉を選んで、ことばを組み立てます</h1>
+<h1>文字を選んで、ことばを組み立てます</h1>
 
 <div id="inputDisplay" class="empty"></div>
 
 <div class="controls">
   <button class="ctrl-btn" id="speakBtn">発声</button>
-  <button class="ctrl-btn" id="backspaceBtn">1つ削除</button>
+  <button class="ctrl-btn" id="backspaceBtn">1文字削除</button>
+  <button class="ctrl-btn" id="commaBtn">、（間をとる）</button>
+  <button class="ctrl-btn" id="questionBtn">？（質問にする）</button>
   <button class="ctrl-btn" id="clearBtn">クリア</button>
 </div>
 
-<hr class="divider">
-
-<div class="workspace">
-  <div class="category-tabs" id="categoryTabs"></div>
-  <div class="word-area" id="wordArea"></div>
-</div>
+<div class="kana-grid" id="kanaGrid"></div>
 
 <div id="status">タップしてね</div>
 
@@ -291,81 +274,20 @@
   <select id="voiceSelect"></select>
 </div>
 
+<details class="help">
+  <summary>押し方のコツ（タップして開く）</summary>
+  <ul>
+    <li>1回タップ：そのままの文字（例：「か」）</li>
+    <li>同じ文字を<b>素早く2回</b>タップ：濁音（例：「か」→「が」、「つ」→「っ」）</li>
+    <li>同じ文字を<b>素早く3回</b>タップ：半濁音（例：「は」→「ぱ」、は行のみ）</li>
+    <li>同じ文字を<b>少し間をあけてゆっくり2回</b>タップ：同じ文字を2つ並べる（例：「は」＋「は」→「はは」）</li>
+    <li>「、」を入れると、発声のときに少し間があきます</li>
+    <li>「？」を最後に入れると、質問っぽい上がり調子で読み上げます</li>
+  </ul>
+</details>
+
 <script>
-  /* ===================== カテゴリーと単語のデータ ===================== */
-  // ここに1行足すだけで単語が増える。新しいカテゴリーもオブジェクトを1つ足すだけで増やせる。
-  const CATEGORIES = {
-    hito: {
-      label: '呼びかけ・人',
-      color: '#ffd54f', hover: '#f0c030', text: '#5c4a1a',
-      words: ['おとうさん', 'せんせい', 'マナブ', 'トシエ', 'ヨシト', 'ミオ', 'だれか']
-    },
-    karada: {
-      label: 'からだ・きもち',
-      color: '#6fb7ff', hover: '#4f9fe8', text: '#ffffff',
-      words: ['あつい', 'さむい', 'かゆい', 'いたい', 'だるい', 'ねむい', 'のどかわいた']
-    },
-    mono: {
-      label: 'もの',
-      color: '#ffb35c', hover: '#f59a3c', text: '#ffffff',
-      words: ['お茶', 'お水', 'ひざかけ', 'まくら', 'テレビ', 'くすり', 'ごはん']
-    },
-    shitehoshii: {
-      label: 'してほしいこと',
-      color: '#6fcf97', hover: '#4fae7c', text: '#ffffff',
-      words: ['たべたい', 'のみたい', 'ねたい', 'やすみたい', 'てつだって', 'うごかして']
-    }
-  };
-
-  const ACTIVE_CATEGORY_KEY = 'talkapp_active_category';
-  let activeCategory = localStorage.getItem(ACTIVE_CATEGORY_KEY) || 'hito';
-  if (!CATEGORIES[activeCategory]) activeCategory = 'hito';
-
-  const root = document.documentElement;
-  const categoryTabs = document.getElementById('categoryTabs');
-  const wordArea = document.getElementById('wordArea');
-
-  function applyCategoryColors(cat) {
-    root.style.setProperty('--cat', cat.color);
-    root.style.setProperty('--cat-hover', cat.hover);
-    root.style.setProperty('--cat-text', cat.text);
-  }
-
-  function renderTabs() {
-    categoryTabs.innerHTML = '';
-    Object.entries(CATEGORIES).forEach(([key, cat]) => {
-      const tab = document.createElement('button');
-      tab.className = 'category-tab' + (key === activeCategory ? ' active' : '');
-      tab.textContent = cat.label;
-      tab.style.setProperty('--tab-color', cat.color);
-      tab.addEventListener('click', () => {
-        activeCategory = key;
-        localStorage.setItem(ACTIVE_CATEGORY_KEY, key);
-        renderTabs();
-        renderWords();
-      });
-      categoryTabs.appendChild(tab);
-    });
-  }
-
-  function renderWords() {
-    const cat = CATEGORIES[activeCategory];
-    applyCategoryColors(cat);
-    wordArea.innerHTML = '';
-    cat.words.forEach(word => {
-      const btn = document.createElement('button');
-      btn.className = 'word-pill';
-      btn.textContent = word;
-      btn.addEventListener('click', () => {
-        btn.classList.add('just-clicked');
-        setTimeout(() => btn.classList.remove('just-clicked'), 150);
-        addWord(word);
-      });
-      wordArea.appendChild(btn);
-    });
-  }
-
-  /* ===================== 音声合成まわり（他ページと共通の仕組み） ===================== */
+  /* ===================== 音声合成まわり（既存アプリと共通の仕組み） ===================== */
   const status = document.getElementById('status');
   const voiceSelect = document.getElementById('voiceSelect');
 
@@ -419,77 +341,136 @@
   window.speechSynthesis.onvoiceschanged = populateVoices;
   populateVoices();
 
-  /* ===================== 文章組み立てバー（気持ちボタン以外のページ間で共通・localStorageで保持） ===================== */
-  const COMPOSE_KEY = 'talkapp_compose_queue';
+  /* ===================== 50音データ ===================== */
+  // 各かなの「押した回数」に応じた変化パターン。1文字のみの配列＝濁音等なし。
+  const variantMap = {
+    'あ': ['あ'], 'い': ['い'], 'う': ['う'], 'え': ['え'], 'お': ['お'],
+    'か': ['か', 'が'], 'き': ['き', 'ぎ'], 'く': ['く', 'ぐ'], 'け': ['け', 'げ'], 'こ': ['こ', 'ご'],
+    'さ': ['さ', 'ざ'], 'し': ['し', 'じ'], 'す': ['す', 'ず'], 'せ': ['せ', 'ぜ'], 'そ': ['そ', 'ぞ'],
+    'た': ['た', 'だ'], 'ち': ['ち', 'ぢ'], 'つ': ['つ', 'っ'], 'て': ['て', 'で'], 'と': ['と', 'ど'],
+    'な': ['な'], 'に': ['に'], 'ぬ': ['ぬ'], 'ね': ['ね'], 'の': ['の'],
+    'は': ['は', 'ば', 'ぱ'], 'ひ': ['ひ', 'び', 'ぴ'], 'ふ': ['ふ', 'ぶ', 'ぷ'], 'へ': ['へ', 'べ', 'ぺ'], 'ほ': ['ほ', 'ぼ', 'ぽ'],
+    'ま': ['ま'], 'み': ['み'], 'む': ['む'], 'め': ['め'], 'も': ['も'],
+    'や': ['や', 'ゃ'], 'ゆ': ['ゆ', 'ゅ'], 'よ': ['よ', 'ょ'],
+    'ら': ['ら'], 'り': ['り'], 'る': ['る'], 'れ': ['れ'], 'ろ': ['ろ'],
+    'わ': ['わ'], 'を': ['を'],
+    'ん': ['ん'],
+    '、': ['、'], '？': ['？'], 'ー': ['ー']
+  };
 
-  function loadQueue() {
-    try {
-      const raw = localStorage.getItem(COMPOSE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
+  // 表の見た目：右から あかさたな… と並ぶように、配列は左(画面左)→右(画面右)の順で
+  // 「ん」が一番左、「あ」が一番右になるよう並べている
+  const columns = [
+    { key: 'ん', rows: ['ん', '', '', '', 'ー'] },
+    { key: 'わ', rows: ['わ', '', '', '', 'を'] },
+    { key: 'ら', rows: ['ら', 'り', 'る', 'れ', 'ろ'] },
+    { key: 'や', rows: ['や', '', 'ゆ', '', 'よ'] },
+    { key: 'ま', rows: ['ま', 'み', 'む', 'め', 'も'] },
+    { key: 'は', rows: ['は', 'ひ', 'ふ', 'へ', 'ほ'] },
+    { key: 'な', rows: ['な', 'に', 'ぬ', 'ね', 'の'] },
+    { key: 'た', rows: ['た', 'ち', 'つ', 'て', 'と'] },
+    { key: 'さ', rows: ['さ', 'し', 'す', 'せ', 'そ'] },
+    { key: 'か', rows: ['か', 'き', 'く', 'け', 'こ'] },
+    { key: 'あ', rows: ['あ', 'い', 'う', 'え', 'お'] },
+  ];
+
+  /* ===================== グリッド生成 ===================== */
+  const kanaGrid = document.getElementById('kanaGrid');
+
+  for (let row = 0; row < 5; row++) {
+    columns.forEach(col => {
+      const ch = col.rows[row];
+      if (ch === '') {
+        const empty = document.createElement('div');
+        empty.className = 'kana-cell-empty';
+        kanaGrid.appendChild(empty);
+      } else {
+        const btn = document.createElement('button');
+        btn.className = 'kana-btn';
+        btn.textContent = ch;
+        btn.dataset.kana = ch;
+        btn.addEventListener('click', () => onKanaClick(ch, btn));
+        kanaGrid.appendChild(btn);
+      }
+    });
   }
 
-  function saveQueue(queue) {
-    try {
-      localStorage.setItem(COMPOSE_KEY, JSON.stringify(queue));
-    } catch {
-      // 保存できなくても画面表示は続行する
-    }
-  }
+  /* ===================== 入力ロジック（濁音/半濁音/連続音の判定） ===================== */
+  const FAST_MS = 350;  // これ以内の再タップ → 濁音/半濁音化
+  const SLOW_MS = 900;  // これ以内（FAST_MSより遅い）の再タップ → 同じ文字を2つ並べる
 
-  let composeQueue = loadQueue();
+  let composed = [];               // 表示中の文字の配列
+  let comboState = { kana: null, index: -1, level: 1, time: 0 };
 
   const inputDisplay = document.getElementById('inputDisplay');
   const speakBtn = document.getElementById('speakBtn');
 
   function render() {
-    const text = composeQueue.join('　');
+    const text = composed.join('');
     inputDisplay.textContent = text;
     inputDisplay.classList.toggle('empty', text.length === 0);
     speakBtn.disabled = text.length === 0;
   }
 
-  function addWord(word) {
-    composeQueue.push(word);
-    saveQueue(composeQueue);
+  function onKanaClick(kana, btnEl) {
+    btnEl.classList.add('just-clicked');
+    setTimeout(() => btnEl.classList.remove('just-clicked'), 150);
+
+    const variants = variantMap[kana] || [kana];
+    const now = Date.now();
+
+    if (variants.length > 1 && comboState.kana === kana) {
+      const elapsed = now - comboState.time;
+
+      if (elapsed <= FAST_MS) {
+        // 素早い連打 → 濁音・半濁音へ段階的に変化（最大パターン数まで）
+        comboState.level = Math.min(comboState.level + 1, variants.length);
+        composed[comboState.index] = variants[comboState.level - 1];
+        comboState.time = now;
+        render();
+        return;
+      } else if (elapsed <= SLOW_MS) {
+        // ゆっくり2回 → 同じ文字をもう一つ並べる（「はは」等）
+        composed.push(kana);
+        comboState = { kana, index: composed.length - 1, level: 1, time: now };
+        render();
+        return;
+      }
+      // SLOW_MSを超えたら新規タップ扱いにフォールスルー
+    }
+
+    // 新規タップ（別の文字／初回／時間切れ）
+    composed.push(kana);
+    comboState = { kana, index: composed.length - 1, level: 1, time: now };
     render();
   }
-
-  function removeLastWord() {
-    if (composeQueue.length === 0) return;
-    composeQueue.pop();
-    saveQueue(composeQueue);
-    render();
-  }
-
-  function clearQueue() {
-    composeQueue = [];
-    saveQueue(composeQueue);
-    render();
-  }
-
-  renderTabs();
-  renderWords();
-  render();
 
   /* ===================== 発声・削除・クリア ===================== */
   const clearBtn = document.getElementById('clearBtn');
   const backspaceBtn = document.getElementById('backspaceBtn');
+  const commaBtn = document.getElementById('commaBtn');
+  const questionBtn = document.getElementById('questionBtn');
 
-  function setControlsEnabled(enabled) {
-    wordArea.classList.toggle('disabled', !enabled);
+  function resetComposition() {
+    composed = [];
+    comboState = { kana: null, index: -1, level: 1, time: 0 };
+    render();
+  }
+
+  function setGridEnabled(enabled) {
+    kanaGrid.classList.toggle('disabled', !enabled);
     clearBtn.disabled = !enabled;
     backspaceBtn.disabled = !enabled;
+    commaBtn.disabled = !enabled;
+    questionBtn.disabled = !enabled;
   }
 
   speakBtn.addEventListener('click', () => {
-    const text = composeQueue.join('　');
+    const text = composed.join('');
     if (!text || !('speechSynthesis' in window)) return;
 
     window.speechSynthesis.cancel();
-    setControlsEnabled(false);
+    setGridEnabled(false);
     speakBtn.disabled = true;
     status.textContent = '再生中...';
 
@@ -501,8 +482,8 @@
     utter.volume = 1.0;
 
     const finish = () => {
-      clearQueue();
-      setControlsEnabled(true);
+      resetComposition();
+      setGridEnabled(true);
       status.textContent = 'タップしてね';
     };
 
@@ -514,11 +495,26 @@
 
   clearBtn.addEventListener('click', () => {
     window.speechSynthesis.cancel();
-    clearQueue();
+    resetComposition();
     status.textContent = 'タップしてね';
   });
 
-  backspaceBtn.addEventListener('click', removeLastWord);
+  backspaceBtn.addEventListener('click', () => {
+    if (composed.length === 0) return;
+    composed.pop();
+    comboState = { kana: null, index: -1, level: 1, time: 0 };
+    render();
+  });
+
+  commaBtn.addEventListener('click', () => {
+    onKanaClick('、', commaBtn);
+  });
+
+  questionBtn.addEventListener('click', () => {
+    onKanaClick('？', questionBtn);
+  });
+
+  render();
 
   /* ===================== 緊急ボタン（どのページにも常設） ===================== */
   const NTFY_TOPIC = 'gaku-talkapp-9fn4uzva5w';

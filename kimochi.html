@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>おはなしボタン</title>
+<style>
+  :root {
+    --bg1: #ffe9f0;
+    --bg2: #fff5e6;
+    --btn: #ff8fab;
+    --btn-hover: #ff6f91;
+    --text: #4a3b3f;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    color: var(--text);
+    text-align: center;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 28px;
+    opacity: 0.75;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 40px;
+    width: min(92vw, 900px);
+  }
+  .word-btn {
+    aspect-ratio: 1 / 1;
+    border-radius: 24px;
+    border: 3px solid transparent;
+    background: var(--btn);
+    color: white;
+    font-size: clamp(1rem, 3.2vw, 1.35rem);
+    font-weight: 700;
+    line-height: 1.4;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(255, 111, 145, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease,
+                background 0.15s ease, border-color 0.15s ease,
+                filter 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+  /* マウスオン（視線が乗っている状態）：明るくなり、輪郭が浮かび上がり、少し拡大 */
+  .word-btn:hover {
+    background: var(--btn-hover);
+    filter: brightness(1.06);
+    border-color: rgba(255, 255, 255, 0.85);
+    transform: scale(1.06);
+    box-shadow: 0 14px 32px rgba(255, 111, 145, 0.55);
+  }
+  /* クリック（決定）した瞬間：明確に沈み込み、濃い色でフィードバック */
+  .word-btn:active,
+  .word-btn.just-clicked {
+    background: #e85d7a;
+    border-color: #ffffff;
+    transform: scale(0.92);
+    box-shadow: 0 4px 12px rgba(255, 111, 145, 0.45);
+    filter: brightness(0.96);
+  }
+  /* 読み上げ中：ゆっくり脈打つように光る */
+  .word-btn.speaking {
+    border-color: rgba(255, 255, 255, 0.9);
+    animation: pulse 1s infinite ease-in-out;
+  }
+  /* 再生待ちのキュー状態：やや薄く、控えめに */
+  .word-btn.queued {
+    opacity: 0.55;
+    transform: scale(0.97);
+  }
+
+  /* 緊急ボタン：他のボタンと混同しないよう、色と見た目をはっきり変える */
+  .word-btn.emergency {
+    background: #e6483f;
+    box-shadow: 0 8px 22px rgba(230, 72, 63, 0.45);
+  }
+  .word-btn.emergency:hover {
+    background: #cf372e;
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 14px 32px rgba(230, 72, 63, 0.6);
+  }
+  .word-btn.emergency:active,
+  .word-btn.emergency.just-clicked {
+    background: #b32a22;
+  }
+  .word-btn.emergency.sent {
+    background: #6fae6a;
+    box-shadow: 0 8px 22px rgba(111, 174, 106, 0.5);
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 8px 22px rgba(255, 111, 145, 0.4); }
+    50% { box-shadow: 0 8px 34px rgba(255, 111, 145, 0.75); }
+  }
+  #status {
+    margin-top: 26px;
+    font-size: 0.9rem;
+    opacity: 0.6;
+    min-height: 1.2em;
+  }
+  .top-nav {
+    align-self: flex-start;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+  .top-nav a {
+    color: var(--text);
+    opacity: 0.6;
+    text-decoration: none;
+  }
+  .top-nav a:hover { opacity: 1; }
+  #settings {
+    margin-top: 34px;
+    font-size: 0.8rem;
+    opacity: 0.55;
+  }
+  #settings select {
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 0.8rem;
+    max-width: 90vw;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-nav"><a href="index.html">← ホームにもどる</a></div>
+
+<h1>ボタンをタップすると読み上げます</h1>
+
+<div class="grid" id="grid">
+  <button class="word-btn" data-text="おとうさん">おとうさん</button>
+  <button class="word-btn" data-text="あつい">あつい</button>
+  <button class="word-btn" data-text="さむい">さむい</button>
+  <button class="word-btn" data-text="お茶のみたい">お茶<br>のみたい</button>
+  <button class="word-btn" data-text="トイレに行きたい">トイレに<br>行きたい</button>
+  <button class="word-btn" data-text="かゆい">かゆい</button>
+  <button class="word-btn emergency" id="emergencyBtn">緊急</button>
+</div>
+
+<div id="status">タップしてね</div>
+
+<div id="settings">
+  声の選択（自動で日本語の女性声を選んでいます）<br>
+  <select id="voiceSelect"></select>
+</div>
+
+<script>
+  const status = document.getElementById('status');
+  const voiceSelect = document.getElementById('voiceSelect');
+  const buttons = document.querySelectorAll('.word-btn:not(.emergency)');
+
+  let voices = [];
+  let chosenVoice = null;
+
+  // 日本語かつ女性寄り・若め・自然な音声を優先的にスコアリングする
+  function scoreVoice(v) {
+    let score = 0;
+    const name = v.name.toLowerCase();
+    if (v.lang && v.lang.toLowerCase().startsWith('ja')) score += 100;
+    if (name.includes('natural')) score += 40;
+    if (name.includes('neural')) score += 40;
+    if (name.includes('google')) score += 25;
+    if (!v.localService) score += 15;
+    if (name.includes('female') || name.includes('woman')) score += 20;
+    if (name.includes('nanami') || name.includes('haruka') || name.includes('kyoko') || name.includes('o-ren') || name.includes('sayaka') || name.includes('mizuki')) score += 30;
+    if (name.includes('male') || name.includes('otoya') || name.includes('ichiro')) score -= 100;
+    return score;
+  }
+
+  function populateVoices() {
+    voices = window.speechSynthesis.getVoices();
+    voiceSelect.innerHTML = '';
+
+    const jaVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ja'));
+    const list = jaVoices.length > 0 ? jaVoices : voices;
+
+    list
+      .slice()
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a))
+      .forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = `${v.name} (${v.lang})${v.localService ? '' : ' ☁️'}`;
+        voiceSelect.appendChild(opt);
+      });
+
+    if (list.length > 0) {
+      const best = list.slice().sort((a, b) => scoreVoice(b) - scoreVoice(a))[0];
+      voiceSelect.value = best.name;
+      chosenVoice = best;
+      status.textContent = `使用する声: ${best.name}`;
+    } else {
+      status.textContent = '日本語の音声が見つかりませんでした（ブラウザ設定をご確認ください）';
+    }
+  }
+
+  voiceSelect.addEventListener('change', () => {
+    chosenVoice = voices.find(v => v.name === voiceSelect.value) || null;
+  });
+
+  window.speechSynthesis.onvoiceschanged = populateVoices;
+  populateVoices();
+
+  let queue = [];
+  let isSpeaking = false;
+
+  function speak(text, btnEl) {
+    if (!('speechSynthesis' in window)) {
+      status.textContent = 'このブラウザは音声合成に対応していません。';
+      return;
+    }
+
+    queue.push({ text, btnEl });
+
+    if (isSpeaking) {
+      status.textContent = '再生待ち...';
+      btnEl.classList.add('queued');
+    } else {
+      playNext();
+    }
+  }
+
+  function playNext() {
+    if (queue.length === 0) {
+      isSpeaking = false;
+      return;
+    }
+
+    isSpeaking = true;
+    const { text, btnEl } = queue.shift();
+    btnEl.classList.remove('queued');
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'ja-JP';
+    if (chosenVoice) utter.voice = chosenVoice;
+
+    utter.rate = 0.82;
+    utter.pitch = 1.05;
+    utter.volume = 1.0;
+
+    utter.onstart = () => {
+      btnEl.classList.add('speaking');
+      status.textContent = '再生中...';
+    };
+    utter.onend = () => {
+      btnEl.classList.remove('speaking');
+      // 少し間を置いてから次を再生（連続再生時の不具合対策）
+      setTimeout(playNext, 150);
+    };
+    utter.onerror = (e) => {
+      btnEl.classList.remove('speaking');
+      if (e.error !== 'interrupted' && e.error !== 'canceled') {
+        status.textContent = 'エラーが発生しました。もう一度お試しください。';
+      }
+      setTimeout(playNext, 150);
+    };
+
+    window.speechSynthesis.speak(utter);
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // クリック直後の押下フィードバックを確実に見せる
+      btn.classList.add('just-clicked');
+      setTimeout(() => btn.classList.remove('just-clicked'), 180);
+
+      speak(btn.dataset.text, btn);
+    });
+  });
+
+  /* ===================== 緊急ボタン ===================== */
+  // ntfy.sh の「トピック名」。第三者に知られると誰でも通知を送れてしまうため、
+  // 第三者が推測しにくいランダムな文字列にしてあります。他人と共有しないでください。
+  const NTFY_TOPIC = 'gaku-talkapp-9fn4uzva5w';
+  const EMERGENCY_TEXT = '緊急です　すぐにきて';
+
+  const emergencyBtn = document.getElementById('emergencyBtn');
+
+  emergencyBtn.addEventListener('click', () => {
+    emergencyBtn.classList.add('just-clicked');
+    setTimeout(() => emergencyBtn.classList.remove('just-clicked'), 180);
+
+    // その場でも聞こえるよう、音声でも読み上げる
+    speak(EMERGENCY_TEXT, emergencyBtn);
+
+    // 相手のスマホへプッシュ通知を送信
+    try {
+      // タイトルの日本語は、HTTPヘッダーではなくURLのクエリパラメータとして渡す
+      // （ヘッダーだとntfy側がURLデコードしてくれず、文字化けして表示されてしまうため）
+      const titleParam = encodeURIComponent('おはなしボタン：緊急連絡');
+      fetch(`https://ntfy.sh/${NTFY_TOPIC}?title=${titleParam}`, {
+        method: 'POST',
+        body: EMERGENCY_TEXT,
+        headers: {
+          'Priority': 'urgent',
+          'Tags': 'rotating_light'
+        }
+      })
+        .then(res => {
+          if (res.ok) {
+            emergencyBtn.classList.add('sent');
+            setTimeout(() => emergencyBtn.classList.remove('sent'), 4000);
+          } else {
+            status.textContent = '通知の送信に失敗しました（電波・Wi-Fiをご確認ください）';
+          }
+        })
+        .catch(() => {
+          status.textContent = '通知の送信に失敗しました（電波・Wi-Fiをご確認ください）';
+        });
+    } catch (err) {
+      // fetch自体が同期的にエラーを投げた場合も、画面に分かるようにしておく
+      status.textContent = '通知の送信でエラーが発生しました: ' + err.message;
+    }
+  });
+</script>
+
+</body>
+</html>
