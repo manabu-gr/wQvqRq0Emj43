@@ -36,10 +36,10 @@
     opacity: 0.75;
   }
   .menu {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 24px;
-    width: min(92vw, 620px);
+    width: min(90vw, 420px);
   }
   .menu-link {
     display: block;
@@ -48,8 +48,8 @@
     background: var(--btn);
     color: white;
     text-decoration: none;
-    padding: 30px 18px;
-    font-size: 1.2rem;
+    padding: 32px 20px;
+    font-size: 1.25rem;
     font-weight: 700;
     box-shadow: 0 8px 22px rgba(255, 111, 145, 0.35);
     transition: transform 0.15s ease, box-shadow 0.15s ease,
@@ -101,21 +101,9 @@
     あいうえお表
     <span class="sub">50音から文章を組み立てて発声</span>
   </a>
-  <a class="menu-link blue" href="karada-kimochi.html">
-    からだ・きもち
-    <span class="sub">あつい・さむい・いたい 等</span>
-  </a>
-  <a class="menu-link green" href="shitehoshii.html">
-    してほしいこと
-    <span class="sub">たべたい・ねたい 等</span>
-  </a>
-  <a class="menu-link orange" href="mono.html">
-    もの
-    <span class="sub">お茶・お水・くすり 等</span>
-  </a>
-  <a class="menu-link yellow" href="yobikake.html">
-    呼びかけ・人
-    <span class="sub">家族や先生の名前</span>
+  <a class="menu-link blue" href="kumitate.html">
+    ことばの組み立て
+    <span class="sub">からだ・きもち／してほしいこと／もの／呼びかけ</span>
   </a>
 </div>
 
