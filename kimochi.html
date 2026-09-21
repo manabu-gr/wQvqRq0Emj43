@@ -37,10 +37,10 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 40px;
-    width: min(92vw, 900px);
+    width: min(92vw, 720px);
   }
   .word-btn {
     aspect-ratio: 1 / 1;
@@ -89,23 +89,47 @@
     transform: scale(0.97);
   }
 
-  /* 緊急ボタン：他のボタンと混同しないよう、色と見た目をはっきり変える */
-  .word-btn.emergency {
-    background: #e6483f;
-    box-shadow: 0 8px 22px rgba(230, 72, 63, 0.45);
+  /* どのページからでも押せる、常設の緊急ボタン */
+  .emergency-fab {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: white;
+    background: radial-gradient(circle at 35% 28%, #ff6b60, #e6483f 60%, #c73a32 100%);
+    box-shadow:
+      0 10px 24px rgba(230, 72, 63, 0.5),
+      inset 0 3px 6px rgba(255, 255, 255, 0.35),
+      inset 0 -6px 10px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    z-index: 10;
   }
-  .word-btn.emergency:hover {
-    background: #cf372e;
-    border-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 14px 32px rgba(230, 72, 63, 0.6);
+  .emergency-fab:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 14px 30px rgba(230, 72, 63, 0.6),
+      inset 0 3px 6px rgba(255, 255, 255, 0.4),
+      inset 0 -6px 10px rgba(0, 0, 0, 0.25);
   }
-  .word-btn.emergency:active,
-  .word-btn.emergency.just-clicked {
-    background: #b32a22;
+  .emergency-fab:active,
+  .emergency-fab.just-clicked {
+    transform: translateY(2px) scale(0.96);
+    background: radial-gradient(circle at 35% 28%, #d84b41, #b32a22 70%);
+    box-shadow:
+      0 4px 10px rgba(230, 72, 63, 0.45),
+      inset 0 3px 8px rgba(0, 0, 0, 0.3);
   }
-  .word-btn.emergency.sent {
-    background: #6fae6a;
-    box-shadow: 0 8px 22px rgba(111, 174, 106, 0.5);
+  .emergency-fab.sent {
+    background: radial-gradient(circle at 35% 28%, #8fd48a, #6fae6a 60%, #57945a 100%);
   }
   @keyframes pulse {
     0%, 100% { box-shadow: 0 8px 22px rgba(255, 111, 145, 0.4); }
@@ -146,6 +170,7 @@
 <body>
 
 <div class="top-nav"><a href="index.html">← ホームにもどる</a></div>
+<button class="emergency-fab" id="emergencyBtn">緊急</button>
 
 <h1>ボタンをタップすると読み上げます</h1>
 
@@ -156,7 +181,6 @@
   <button class="word-btn" data-text="お茶のみたい">お茶<br>のみたい</button>
   <button class="word-btn" data-text="トイレに行きたい">トイレに<br>行きたい</button>
   <button class="word-btn" data-text="かゆい">かゆい</button>
-  <button class="word-btn emergency" id="emergencyBtn">緊急</button>
 </div>
 
 <div id="status">タップしてね</div>
@@ -169,7 +193,7 @@
 <script>
   const status = document.getElementById('status');
   const voiceSelect = document.getElementById('voiceSelect');
-  const buttons = document.querySelectorAll('.word-btn:not(.emergency)');
+  const buttons = document.querySelectorAll('.word-btn');
 
   let voices = [];
   let chosenVoice = null;
@@ -290,7 +314,7 @@
     });
   });
 
-  /* ===================== 緊急ボタン ===================== */
+  /* ===================== 緊急ボタン（どのページにも常設） ===================== */
   // ntfy.sh の「トピック名」。第三者に知られると誰でも通知を送れてしまうため、
   // 第三者が推測しにくいランダムな文字列にしてあります。他人と共有しないでください。
   const NTFY_TOPIC = 'gaku-talkapp-9fn4uzva5w';
@@ -302,8 +326,13 @@
     emergencyBtn.classList.add('just-clicked');
     setTimeout(() => emergencyBtn.classList.remove('just-clicked'), 180);
 
-    // その場でも聞こえるよう、音声でも読み上げる
-    speak(EMERGENCY_TEXT, emergencyBtn);
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(EMERGENCY_TEXT);
+    utter.lang = 'ja-JP';
+    if (chosenVoice) utter.voice = chosenVoice;
+    utter.rate = 0.82;
+    utter.pitch = 1.05;
+    window.speechSynthesis.speak(utter);
 
     // 相手のスマホへプッシュ通知を送信
     try {
